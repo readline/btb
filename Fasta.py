@@ -54,7 +54,7 @@ class Parse(object):
         self.file.close()
 
 def write(fadic, savepath, orderlist=[],description={}):
-    '''class Write(fadic, savepath, *orderlist=[default []], *description=[default {}])
+    '''func write(fadic, savepath, *orderlist=[default []], *description=[default {}])
     '''
     from textwrap import wrap
     fadic = fadic
