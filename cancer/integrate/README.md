@@ -1,4 +1,4 @@
-#btb/cancer
+#btb/cancer/integrate
 Cancer related tools.
 
 ##bam2TargetCoverage.py
