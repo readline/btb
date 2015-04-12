@@ -3,7 +3,7 @@
 # 150413
 # Kai Yu
 # https://github.com/readline
-#################################################
+################################################
 # Calculate the mutation pattern with both 10 base up/down stream of reference.
 # ./pattern10baseRef.py [ref fasta path] [ref bed path] [output prefix]
 from __future__ import division

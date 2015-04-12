@@ -19,3 +19,4 @@ Calculate the mutation pattern with both 10 base up/down stream of reference.
 	./pattern10baseRef.py [ref fasta path] [ref bed path] [output prefix]
 
 ---
+
