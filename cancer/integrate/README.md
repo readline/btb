@@ -18,3 +18,11 @@ Cancer related tools.
 ###mafSignature2plot.py
   * mafSignature2plot.py [input signature path]
   * Import the signature matrix and plot to png and pdf file.
+
+---
+##coMut
+Tools to prepare the coMut plot
+
+---
+##targetCoverage
+Tools to prepare the exon target coverage plot
