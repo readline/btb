@@ -1,4 +1,4 @@
-#btb/cancer/integrate/TargetCoverage
+#btb/cancer/integrate/targetCoverage
 
 ---
 
