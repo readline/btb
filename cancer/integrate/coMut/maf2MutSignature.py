@@ -103,7 +103,7 @@ def maf2flank(mafPath, fadic, prefix):
         count += 1
         chrid, pos, ref, alt = c[4], int(c[5]), c[10], c[12]
         save3.write('%s\t%d\t%s\t%s\n'%(chrid,pos,alt,'\t'.join(list(fadic[chrid][pos-2:pos+1].upper()))))
-        save10.write('%s\t%d\t%s\t%s\n'%(chrid,pos,alt,'\t'.join(list(fadic[chrid][pos-11:pos+11].upper()))))
+        save10.write('%s\t%d\t%s\t%s\n'%(chrid,pos,alt,'\t'.join(list(fadic[chrid][pos-11:pos+10].upper()))))
     save3.close()
     save10.close()
     return len(patientdic), count
