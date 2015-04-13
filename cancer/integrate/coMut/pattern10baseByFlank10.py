@@ -4,7 +4,9 @@
 # Kai Yu
 # https://github.com/readline
 ################################################
-
+# Use the flank10 file produced by maf2MutSignature.py
+# generate 6 types' mutation pattern with up/down stream 10bases
+# ./pattern10baseByFlank10.py [flank 10 path] [output prefix]
 from __future__ import division
 import os,sys,gzip
 
@@ -35,9 +37,9 @@ def importFlank10(flankPath):
         else:
             ref = seq0
             alt = c[2]
-        if seq[10] == 'T':
+        if ref[10] == 'T':
             ttmpDic[alt].append(ref)
-        elif seq[10] == 'C':
+        elif ref[10] == 'C':
             ctmpDic[alt].append(ref)
     infile.close()
     return ttmpDic, ctmpDic
@@ -48,19 +50,14 @@ def importFlank10(flankPath):
 #         total += basedic[n]
 #     return basedic[base] / total
 
-# def calcSeq(seqlist):
-#     tmpDic = {}
-#     for n in range(len(seqlist[0])):
-#         tmpDic[n] = {'A':0, 'T':0, 'C':0, 'G':0}
-#     for seq in seqlist:
-#         for n in range(len(seq)):
-#             tmpDic[n][seq[n]] += 1
-#     tmpDic2 = {}
-#     for n in range(len(seqlist[0])):
-#         tmpDic2[n] = {}
-#         for b in 'ATCG':
-#             tmpDic2[n][b] = calcRatio(tmpDic[n], b)
-#     return tmpDic2
+def calcSeq(seqlist):
+    tmpDic = {}
+    for n in range(len(seqlist[0])):
+        tmpDic[n] = {'A':0, 'T':0, 'C':0, 'G':0}
+    for seq in seqlist:
+        for n in range(len(seq)):
+            tmpDic[n][seq[n]] += 1
+    return tmpDic
 
 def main():
     try:
@@ -72,9 +69,27 @@ def main():
     tDic, cDic = importFlank10(flankPath)
 
     for b in 'ACG':
-
         savefile = open('%s.T%s10'%(prefix,b),'w')
+        result = calcSeq(tDic[b])
+        for base in 'TGCA':
+            savefile.write(base)
+            for n in range(len(result)):
+                savefile.write('\t%f'%result[n][base])
+            savefile.write('\n')
+        savefile.close()
 
+    for b in 'ATG':
+        savefile = open('%s.C%s10'%(prefix,b),'w')
+        result = calcSeq(cDic[b])
+        for base in 'TGCA':
+            savefile.write(base)
+            for n in range(len(result)):
+                savefile.write('\t%d'%result[n][base])
+            savefile.write('\n')
+        savefile.close()
+
+if __name__ == '__main__':
+    main()
 
 
 
