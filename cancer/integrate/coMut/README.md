@@ -2,7 +2,7 @@
 
 ---
 
-## <img src="emoji/star" width="18"/>Mutation signature
+## Mutation signature
 
 ---
 
@@ -26,7 +26,7 @@ Import the trimut file produced by maf2MutSignature.py and calculate the spectra
 
 ---
 
-## <img src="emoji/star" width="18"/>pattern 10 base
+## pattern 10 base
 
 ---
 
@@ -38,6 +38,6 @@ Calculate the mutation pattern with both 10 base up/down stream of reference.
 
 ---
 
-### Use the flank10 file produced by maf2MutSignature.py
-generate 6 types' mutation pattern with up/down stream 10bases
+### pattern10baseByFlank10.py
+Use the flank10 file produced by maf2MutSignature.py, generate 6 types' mutation pattern with up/down stream 10bases
     ./pattern10baseByFlank10.py [flank 10 path] [output prefix]
