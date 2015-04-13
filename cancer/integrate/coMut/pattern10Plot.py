@@ -31,6 +31,19 @@ def font(size):
     return matplotlib.font_manager.FontProperties(size=size,\
         fname='/Share/BP/yukai/src/font/ARIAL.TTF')
 
+def calcYticks(ymax):
+    if ymax >0.1 and ymax <= 1:
+        return [n/10 for n in range(0, ymax*10+1,2)]
+    elif ymax >1 and ymax <= 10:
+        return range(0,ymax,2)
+    elif ymax > 10:
+        for x in [10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000]:
+            if ymax / x <10:
+                return range(0,ymax,x)
+        return [0,ymax]
+    else:
+        return [0,ymax]
+
 def main():
     try:
         prefix = sys.argv[1]
@@ -93,13 +106,11 @@ def main():
     ax[7] = fig.add_axes([0.56,0.08,0.35,0.18])
 
     for n in range(8):
-        # print n
-        # print len(data[n][3]),len(data[n][2]),len(data[n][1]),len(data[n][0])
         ax[n].bar(range(21), data[n][3],width=1,alpha=0.8,align='center',color=colorlist[3])
         ax[n].bar(range(21), data[n][2],width=1,alpha=0.8,align='center',color=colorlist[2],bottom=data[n][3])
         ax[n].bar(range(21), data[n][1],width=1,alpha=0.8,align='center',color=colorlist[1],bottom=[x+y for x,y in zip(data[n][3],data[n][2])])
         ax[n].bar(range(21), data[n][0],width=1,alpha=0.8,align='center',color=colorlist[0],bottom=[x+y+z for x,y,z in zip(data[n][3],data[n][2],data[n][1])])
-        ymax = data[n][3][0] + data[n][2][0] + data[n][1][0] + data[n][0][0]
+        ymax = int(data[n][3][0] + data[n][2][0] + data[n][1][0] + data[n][0][0])
         ax[n].set_ylim(0,ymax)
         ax[n].set_xlim(-0.5,20.5)
         ax[n].set_title(title[n], fontproperties=font(24))
@@ -116,19 +127,14 @@ def main():
         plt.setp(ax[n+10].get_xticklines(), visible=False)
         plt.setp(ax[n+10].get_yticklines(), visible=False)
         if n > 1:
-            ax[n].set_yticks(range(0,int(ymax),int(ymax//5)//100 *100))
-            ax[n].set_yticklabels(range(0,int(ymax),int(ymax//5)//100 *100),fontproperties=font(18))
+            ax[n].set_yticks(calcYticks(ymax))
+            ax[n].set_yticklabels(calcYticks(ymax),fontproperties=font(18))
         else:
-            ax[n].set_yticks([x/10 for x in range(0,11,2)])
-            ax[n].set_yticklabels([x/10 for x in range(0,11,2)],fontproperties=font(18))
-
-    # for n in range(8):
-    #     ax[n].bar(range(21), data[n][0],width=1, color=colorlist)
-    #     ax[n].bar(range(21), data[n][1],width=1, color=colorlist,bottom=data[n][0])
-    #     ax[n].bar(range(21), data[n][2],width=1, color=colorlist,bottom=data[n][1])
-    #     ax[n].bar(range(21), data[n][3],width=1, color=colorlist,bottom=data[n][2])
+            ax[n].set_yticks(calcYticks(ymax))
+            ax[n].set_yticklabels(calcYticks(ymax),fontproperties=font(18))
 
     fig.savefig(prefix+'.png')
+    fig.savefig(prefix+'.pdf')
 
 if __name__ == '__main__':
     main()
