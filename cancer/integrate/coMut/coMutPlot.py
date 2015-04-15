@@ -4,6 +4,8 @@
 # Kai Yu
 # github.com/readline
 # 150413
+##############################################
+# coMutPlot.py [matrixPath] [sampleRatePath] [sampleTypePath] [geneMutCountPath] [geneMutResultPath] [ClinicPath] [output prefix]
 
 from __future__ import division
 import os,sys,math
@@ -126,7 +128,7 @@ def main():
         clinicPath = sys.argv[6]
         prefix = sys.argv[7]
     except:
-        print sys.argv[0] + ' [matrixPath] [sampleRatePath] [sampleTypePath] [geneMutCountPath] [geneMutResultPath] [output prefix]'
+        print sys.argv[0] + ' [matrixPath] [sampleRatePath] [sampleTypePath] [geneMutCountPath] [geneMutResultPath] [clinicPath] [output prefix]'
         exit()
 
     fig = plt.figure(figsize = (20,20))
