@@ -1,8 +1,11 @@
-#btb/cancer/integrate
+# btb/cancer/integrate
+
 Cancer related tools.
 
+---
 
-##MuSicSmgSort.R
+## MuSicSmgSort.R
+
   * MuSicSmgSort.R [MuSic smg file]
   * Sort the MuSic output smg file with P-value CT then tot muts.
   * Takes only one argument: smg file path
@@ -10,9 +13,18 @@ Cancer related tools.
 
 ---
 
-##coMut
+## coMut
+
 Tools to prepare the coMut plot
 
 ---
-##targetCoverage
+
+## targetCoverage
+
 Tools to prepare the exon target coverage plot
+
+---
+
+## gisticPlot
+
+Tools for GISTIC result reploting since the resolution of GISTIC raw output images are quite low.
