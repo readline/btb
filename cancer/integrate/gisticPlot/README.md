@@ -8,9 +8,7 @@ Tools for GISTIC result reploting since the resolution of GISTIC raw output imag
 
 Plot arm level copy number sig with data from broad_significance_results.txt
 
-'''
-./armSigPlot.py broad_significance_results.txt [output prefix]
-'''
+	./armSigPlot.py broad_significance_results.txt [output prefix]
 
 ---
 
@@ -18,6 +16,4 @@ Plot arm level copy number sig with data from broad_significance_results.txt
 
 Plot the both amp and del qplot with scores.gistic result.
 
-'''
-./scoreGisPlot.py scores.gistic [output prefix]
-'''
+	./scoreGisPlot.py scores.gistic [output prefix]
