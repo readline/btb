@@ -115,10 +115,10 @@ def main():
     ax1.set_xlim([max(ampxlist+delxlist),0])
     ax2.set_xlim([0,max(ampxlist+delxlist)])
 
-    ax1.set_xticks(range(0,int(max(ampxlist+delxlist)),2))
-    ax1.set_xticklabels(range(0,int(max(ampxlist+delxlist)),2),fontproperties=font(20))
-    ax2.set_xticks(range(0,int(max(ampxlist+delxlist)),2))
-    ax2.set_xticklabels(range(0,int(max(ampxlist+delxlist)),2),fontproperties=font(20))
+    ax1.set_xticks(range(0,int(max(ampxlist+delxlist))+1,2))
+    ax1.set_xticklabels(range(0,int(max(ampxlist+delxlist))+1,2),fontproperties=font(20))
+    ax2.set_xticks(range(0,int(max(ampxlist+delxlist))+1,2))
+    ax2.set_xticklabels(range(0,int(max(ampxlist+delxlist))+1,2),fontproperties=font(20))
 
     chrstart,chrlen,cyto = [],[],[]
     for n in range(1,23):
@@ -152,6 +152,7 @@ def main():
 
     ax1.set_yticks(cyto)
     ax1.set_yticklabels(yticklist,fontproperties=font(18))
+    plt.setp(ax1.get_yticklines(), visible=False)
     ax2.set_yticks([])
 
     ax1.set_xlabel('-log10 amp q-value',fontproperties=font(20))
@@ -244,7 +245,7 @@ def main():
 
 
     plt.savefig(prefix+'.png')
-    # plt.savefig(prefix+'.pdf')
+    plt.savefig(prefix+'.pdf')
 
 
 if __name__ == '__main__':
