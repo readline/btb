@@ -101,9 +101,29 @@ def bam2gff(sambin, options):
                 # Do nothing and go to next
                 continue
     samfile = ''
+    savegff = open(options.outpath+'.regions.gff','w')
+    for chrid in tmpdic:
+        for n in range(len(tmpdic[chrid])):
+            savegff.write('%s\tpartition\tregion\t%d\t%d\t.\t+\t.\t.\t.\n' \
+                %(tmpdic[chrid][n][0],tmpdic[chrid][n][1],tmpdic[chrid][n][2],))
+    savegff.close()
     return tmpdic
 
+def Tbam2gff():
+    sambin = 'samtools'
+    class Arguments(object):
+        def __init__(self):
+            self.mapq=1
+            self.bampath='test.bam'
+            self.mindep=1
+            self.maxgap=10000
+    options = Arguments()
+    result = bam2gff(sambin,options)
+    for k,v in iteritems(result):
+        print k,v
+        raw_input()
 
+def writeFasta()
 
 def main():
     '''
@@ -133,6 +153,18 @@ def main():
     sambin = os.popen("which samtools").readline().rstrip()
     if sambin == '':
         sys.exit('Samtools not found. Please add samtools to $PATH')
+
+    ########## Prepare output directory ##########
+    if os.path.exist(options.outpath):
+        ifrewrite = raw_input('Output dir %s exist, rewrite? "Y/N"' %options.outpath)
+        if rewrite.upper() == 'N':
+            sys.exit()
+        elif rewrite.upper() == 'Y':
+            pass
+        else:
+            sys.exit('Unrecognized input, input should be Y or N.')
+    else:
+        os.mkdir(options.outpath)
 
     ########## Check wether bam file is sorted #########
     isBamSorted(sambin, options.bampath)
