@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 # trinity_GG_gff.listing_to_continuous_region.py
-# version 1.0
+# version 1.1
 # Kai Yu
 # github.com/readline
 # 150423
 ##############################################
 # version1.0: Runable, but sortcheck and bam2gff module runs in single processor.
+# version1.1: 1. Sorcheck only check the first chromosome in header. 
+#             2. Bam2gff modified to run in MP.
+#             3. Bug fixed when unmapped single end read have flag '0'
 
 import os,sys,time,gzip
 import multiprocessing
@@ -19,7 +22,14 @@ def timestamp():
 def isBamSorted(sambin, bampath):
     '''Check wether the bamfile is sorted.
     If sorted, return True, otherwise exit'''
-    tmp = os.popen('%s depth %s | head' %(sambin, bampath)).readline()
+    # get a chrid
+    tmp = os.popen('%s view -H %s' %(sambin, bampath))
+    while 1:
+        line = tmp.readline().rstrip()
+        if not line: break
+        if line[:3] == '@SQ':
+            firstchr = line.split('\t')[1][3:]
+    tmp = os.popen('%s depth -r %s %s | head' %(sambin, firstchr, bampath)).readline()
     if tmp == '':
         sys.exit('Unsorted bam file. Please sort it first.')
     else:
@@ -37,11 +47,12 @@ def getHeaderList(sambin, bampath):
             chrList.append(c[1].split(':')[1])
     return chrList
 
-def bam2gff(sambin, options):
-    samfile = os.popen('%s depth -Q %d %s' %(sambin, options.mapq, options.bampath))
+def bam2gff(sambin, chrid, optdic):
+    samfile = os.popen('%s depth -Q %d -r %s %s' %(sambin, optdic['mapq'], chrid, optdic['bampath']))
     tmpline = samfile.readline()
     if tmpline.rstrip() == '':
-        sys.exit('Bamfile can not open.')
+        samfile = ''
+        return {}
     tmpdic = {}
     c = tmpline.rstrip().split('\t')
     start = int(c[1])
@@ -61,11 +72,12 @@ def bam2gff(sambin, options):
             # Is counting
             if c[0] != lastchr:
                 # If get to another chr
+                print 'Samtools depth reached %s' %c[0]
                 status = 0 # Quit counting
                 if lastchr not in tmpdic:
                     tmpdic[lastchr] = {}
                 tmpdic[lastchr][len(tmpdic[lastchr].keys())] = [lastchr, start, lastgood]
-                if int(c[2]) >= options.mindep:
+                if int(c[2]) >= optdic['mindep']:
                     # This base's depth OK, start counting 
                     # refresh the "last" words and start
                     start = int(c[1])
@@ -73,16 +85,16 @@ def bam2gff(sambin, options):
                     lastchr = c[0]
                     status = 1
                 continue
-            elif int(c[1]) - lastgood > options.maxgap:
+            elif int(c[1]) - lastgood > optdic['maxgap']:
                 # Gap length exceed
                 status = 0  # Quit counting
                 if lastchr not in tmpdic:
                     tmpdic[lastchr] = {}
                 tmpdic[lastchr][len(tmpdic[lastchr].keys())] = [lastchr, start, lastgood]
                 continue
-            elif int(c[1]) - lastgood <= options.maxgap:
+            elif int(c[1]) - lastgood <= optdic['maxgap']:
                 # Gap length tollerent area
-                if int(c[2]) >= options.mindep:
+                if int(c[2]) >= optdic['mindep']:
                     # This base's depth OK
                     lastchr, lastgood = c[0],int(c[1]) # Refresh the "last" words
                     continue
@@ -92,7 +104,7 @@ def bam2gff(sambin, options):
                     continue
         elif status == 0:
             # If not counting
-            if int(c[2]) >= options.mindep:
+            if int(c[2]) >= optdic['mindep']:
                 # This base's depth OK, start counting 
                 # refresh the "last" words and start
                 start = int(c[1])
@@ -104,15 +116,35 @@ def bam2gff(sambin, options):
                 # This base's depth not pass
                 # Do nothing and go to next
                 continue
-    samfile = ''
-    savegff = open(options.outpath+'/bam.regions.gff','w')
-    for chrid in tmpdic:
-        for n in range(len(tmpdic[chrid])):
-            savegff.write('%s\tpartition\tregion\t%d\t%d\t.\t+\t.\t.\t%s:%d-%d\n' \
-                %(tmpdic[chrid][n][0], tmpdic[chrid][n][1], tmpdic[chrid][n][2], \
-                  tmpdic[chrid][n][0], tmpdic[chrid][n][1], tmpdic[chrid][n][2]))
-    savegff.close()
     return tmpdic
+
+def paraBam2Gff(sambin, chrList, options):
+    optdic = {}
+    optdic['mapq'] = options.mapq
+    optdic['bampath'] = options.bampath
+    optdic['mindep'] = options.mindep
+    optdic['maxgap'] = options.maxgap
+    pool = multiprocessing.Pool(processes=options.thread)
+    result = []
+    for chrid in chrList:
+        result.append(pool.apply_async(bam2gff, args=(sambin, chrid, optdic),))    #(funcgo[sambin, gffdic, chrid, options]))
+    pool.close()
+    pool.join()
+    savegff = open(options.outpath+'/bam.regions.gff','w')
+    gffdic = {}
+    for item in result:
+        tmpdic = item.get()
+        for chrid in tmpdic:
+            if len(tmpdic[chrid]) == 0:
+                continue
+            gffdic[chrid] = tmpdic[chrid]
+            for n in range(len(tmpdic[chrid])):
+                savegff.write('%s\tpartition\tregion\t%d\t%d\t.\t+\t.\t.\t%s:%d-%d\n' \
+                    %(tmpdic[chrid][n][0], tmpdic[chrid][n][1], tmpdic[chrid][n][2], \
+                      tmpdic[chrid][n][0], tmpdic[chrid][n][1], tmpdic[chrid][n][2]))
+    savegff.close()
+    return gffdic
+
 
 def Tbam2gff():
     '''bam2gff function test'''
@@ -132,6 +164,7 @@ def Tbam2gff():
 
 def writeFasta(sambin, gffdic, chrid, optdic): 
     # print 'Prepare %s reads in pid %d' %(chrid, os.getpid())
+    # print sambin, gffdic, chrid, optdic
     try:
         os.makedirs('%s/Regions/%s' %(optdic['outpath'], chrid))
     except:
@@ -148,6 +181,8 @@ def writeFasta(sambin, gffdic, chrid, optdic):
             if not line: break
             c = line.rstrip().split('\t')
             readid, seq, flag = c[0], c[9], bin(int(c[1]))[2:][::-1]
+            if flag == '0':
+                continue
             if flag[4] == 1:
                 seq = seq[::-1]
             else:
@@ -191,8 +226,8 @@ def paraWriteFasta(sambin, tribin, gffdic, options):
     for n in result:
         for reg in n.get():
             tmp.append(reg)
-            cmd ='%s --single %s/%s.fa --output %s/%s.trinity --CPU 1 --max_memory 1G --seqType fa --full_cleanup --verbose; rm -rf %s/%s.trinity' \
-                %(tribin, os.getcwd(), reg, os.getcwd(), reg, os.getcwd(), reg)
+            cmd ='%s --single %s/%s.fa --output %s/%s.trinity --CPU %d --max_memory 2G --seqType fa --full_cleanup --verbose; rm -rf %s/%s.trinity' \
+                %(tribin, os.getcwd(), reg, os.getcwd(), reg,options.Tthread, os.getcwd(), reg)
             cmdfile.write(cmd+'\n')
     cmdfile.close()
     return tmp
@@ -271,8 +306,8 @@ def qsubCMD(options):
             if sgeJobCount > 300: time.sleep(3)
             if sgeJobCount < 390: break
             time.sleep(30)
-        run = commands.getoutput('cd %s && %s region_trinity.cmd.%d.%d' \
-                                %(options.outpath, options.sge, pid, count))
+        run = commands.getoutput('cd %s && %s -l vf=%dG -l num_proc=%d region_trinity.cmd.%d.%d' \
+                                %(options.outpath, options.sge, options.Tthread * 2, options.Tthread, pid, count))
         subed.append(int(run.strip().split()[2]))
     # print 'subed',subed
     # print 'running',getQstatJID()
@@ -363,6 +398,7 @@ def main():
     parser.add_option("-g","--gap",dest="maxgap",default=10000,type="int",help="Max gap tollerence in a region. [Default=10000]")
     parser.add_option("-q","--mapq",dest="mapq",default=1,type="int",help="Mapping quality cutoff. [Default=1]")
     parser.add_option("-t","--thread",dest="thread",default=1,type="int",help="Thread to use. [Default=1]")
+    parser.add_option("-T","--Trinitythread",dest="Tthread",default=1,type="int",help="Thread for trinity to use. [Default=1]")
     parser.add_option("-o","--output",dest="outpath",default="GR_output",help="Output directory. [Default=\"GR_output_(pid)\"]")
     parser.add_option("-s","--sge",dest="sge",default="",help="SGE submit command. [Default=\"\", use single node multiprocessing]")
     (options,args) = parser.parse_args()
@@ -409,9 +445,11 @@ def main():
 
     ########## Read bam file to calc regions and generate gff ##########
     print '%sRead bam to generate regions.' %timestamp()
-    gffdic = bam2gff(sambin,options)
-
+    # gffdic = bam2gff(sambin,options) # single process mode
+    gffdic = paraBam2Gff(sambin, chrList, options) # parallele mode
+    
     ########## Prepare region's fasta and region's downstream cmd ##########
+    print '%sWrite Regions\' fasta file.' %timestamp()
     regionDirList  = paraWriteFasta(sambin, tribin, gffdic, options)
     print '%sRun region CMDs in paralleled mode' %timestamp()
     if options.sge == '':
