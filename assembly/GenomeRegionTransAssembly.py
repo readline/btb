@@ -5,6 +5,7 @@
 # github.com/readline
 # 150423
 ##############################################
+# version1.0: Runable, but sortcheck and bam2gff module runs in single processor.
 
 import os,sys,time,gzip
 import multiprocessing
