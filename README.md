@@ -49,15 +49,15 @@ Some tools for database collecting and manipulating
 ---
 ## sortMatrix.py
 
-'''
-Usage: sortMatrix.py [options]
 
-Options:
-  -h, --help            show this help message and exit
-  -i INPATH, --input=INPATH
-                        Input file path
-  -b, --byrow           Sort by row.[Default=False. Default sort by col.]
-  -r, --reverse         Sort in reverse order.[Default=False]
-  -o OUTPATH, --output=OUTPATH
-                        Output file path
-'''
+	Usage: sortMatrix.py [options]
+	
+	Options:
+	  -h, --help            show this help message and exit
+	  -i INPATH, --input=INPATH
+	                        Input file path
+	  -b, --byrow           Sort by row.[Default=False. Default sort by col.]
+	  -r, --reverse         Sort in reverse order.[Default=False]
+	  -o OUTPATH, --output=OUTPATH
+	                        Output file path
+
