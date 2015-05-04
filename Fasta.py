@@ -74,7 +74,7 @@ def write(fadic, savepath, orderlist=[],description={}):
         des = ''
         if seqid in description:
             des = description[seqid]
-        infile.write('>'+seqid+des+'\n')
+        infile.write('>'+seqid+'\t'+des+'\n')
         infile.write('\n'.join(wrap(seq,60)) + '\n')
 
     infile.close()
