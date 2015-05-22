@@ -1,24 +1,16 @@
 #!/usr/bin/env python
-# sortMatrix.py
-# version 1.0
-# Kai Yu
-# github.com/readline
-# 150504
-##############################################
+# =============================================================================
+# Filename: sortMatrix.py
+# Version: 1.0 
+# Author: Kai Yu - finno@live.cn
+# https://github.com/readline
+# Last modified: 2015-05-22 15:01
+# Description: 
+#   This script can sort a matrix either by row or by column, either in or not in reverse order.
+#   1st column and 1st row must be headers. 
+# =============================================================================
 from optparse import OptionParser
 import copy,sys
-
-def splitContinuousList(tmplist):
-    l = []
-    tmp = []
-    for n in range(len(tmplist)-1):
-        tmp.append(tmplist[n])
-        if tmplist[n][1] != tmplist[n+1][1]:
-            l.append(tmp)
-            tmp = []
-    tmp.append(tmplist[len(tmplist)-1])
-    l.append(tmp)
-    return l
 
 def transpose(m):
     tmpm = []
@@ -29,81 +21,70 @@ def transpose(m):
             tmpm[c].append(m[r][c])
     return tmpm
 
-def sortMatrix(m, reverse=False, bycol=True):
-    if bycol == False:
-        m = transpose(m)
-
-    row = 0
-    tmprow = m[row]
-
-    s0 = [[(n, m[row][n]) for n in range(len(m[row]))]]
+def importFile2mat(options):
+    infile = open(options.inpath, 'r')
+    tmp = []
     while 1:
-        s0copy = copy.deepcopy(s0)
-        s0 = []
-        for sublist in s0copy:
-            sublist = [(x[0],m[row][x[0]]) for x in sublist]
-            s1 = sorted(sublist, lambda x,y: cmp(x[1],y[1]), reverse=reverse)
-            s2 = splitContinuousList(s1)
-            for item in s2:
-                s0.append(item)
-        row += 1
-        if row >= len(m):
-            break
-    result = []
-    for item in s0:
-        for single in item:
-            result.append(single[0])
-    new = []
-    for row in m:
-        new.append([row[x] for x in result])
+        line = infile.readline()
+        if not line: break
+        tmp.append(line.rstrip().split('\t'))
+    infile.close()
+    return tmp
 
-    if bycol == False:
-        new = transpose(new)
-    return new,result
+def mat2dic(mat):
+    tmpdic = {}
+    sortableMat = []
+    tmpdic['header'] = mat[0]
+    count = 0
+    for row in mat[1:]:
+        tmpdic[count] = row
+        sortableMat.append([count] + [float(n) for n in row[1:]])
+        count += 1
+    return tmpdic, sortableMat
+
+def sortMatrix(mat,options):
+    cmd = 'newmat = sorted(mat, key=lambda x:(%s), reverse=%s)' \
+          %(','.join(['x[%d]'%n for n in range(1,len(mat[0]))]),str(options.reverse))
+    exec cmd
+    return newmat
+
+def saveMat(mat, options):
+    savefile = open(options.outpath,'w')
+    for row in mat:
+        savefile.write('\t'.join(row)+'\n')
+    savefile.close()
 
 def main():
     parser = OptionParser(usage="usage: %prog [options]")
     parser.add_option("-i", "--input", dest="inpath",help="Input file path")
-    parser.add_option("-b", "--byrow", action="store_false", dest="byrow", default = True,help="Sort by row.[Default=False. Default sort by col.]")
+    parser.add_option("-b", "--byrow", action="store_true", dest="byrow", default = False, help="Sort by row.[Default=False. Default sort by col.]")
     parser.add_option("-r", "--reverse", action="store_true", dest="reverse", default = False,help="Sort in reverse order.[Default=False]")
     parser.add_option("-o", "--output", dest="outpath", help="Output file path")
     (options, args) = parser.parse_args()
-    # print len()
 
     if not options.inpath or not options.outpath:
         parser.error('Incorrect input option. Use -h to see the help infomation.')
 
-    infile = open(options.inpath,'r')
-    headerc = infile.readline().rstrip().split('\t')
-    colnamelist = headerc[1:]
-
-    rownamelist = []
-    m = []
-    while 1:
-        line = infile.readline().rstrip()
-        if not line: break
-        c = line.split('\t')
-        rownamelist.append(c[0])
-        m.append(c[1:])
-    infile.close()
-    # for r in m:
-    #     print r
-
-    new, order = sortMatrix(m, reverse=options.reverse, bycol=options.byrow)
+    rawMat = importFile2mat(options)
+    
     if options.byrow == True:
-        tmplist = [colnamelist[n] for n in order]
-        colnamelist = tmplist
-    else:
-        tmplist = [rownamelist[n] for n in order]
-        rownamelist = tmplist
+        rawMat = transpose(rawMat)
+    
+    tmpdic, sortableMat = mat2dic(rawMat)
+    
+    sortedMat = sortMatrix(sortableMat, options)
+    
+    outMat = []
+    outMat.append(tmpdic['header'])
+    
+    for n in sortedMat:
+        outMat.append(tmpdic[n[0]])
 
+    if options.byrow == True:
+        outMat = transpose(outMat)
 
-    savefile = open(options.outpath,'w')
-    savefile.write(headerc[0]+'\t'+'\t'.join(colnamelist)+'\n')
-    for n in range(len(new)):
-        savefile.write(rownamelist[n]+'\t'+'\t'.join(new[n])+'\n')
-    savefile.close()
-
+    saveMat(outMat, options)
+    
 if __name__ == '__main__':
     main()
 

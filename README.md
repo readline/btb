@@ -49,7 +49,10 @@ Some tools for database collecting and manipulating
 ---
 ## sortMatrix.py
 
+This script can sort a matrix either by row or by column, either in or not in reverse order.
+1st column and 1st row must be headers.
 
+```
 	Usage: sortMatrix.py [options]
 	
 	Options:
@@ -60,9 +63,11 @@ Some tools for database collecting and manipulating
 	  -r, --reverse         Sort in reverse order.[Default=False]
 	  -o OUTPATH, --output=OUTPATH
 	                        Output file path
+```
 
 ---
 ## sortCols.py 
+
 A small tool for soring a table.
 
 The table could have a header line or not, but first column in a line must be a row title.
