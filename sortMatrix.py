@@ -45,6 +45,7 @@ def mat2dic(mat):
 def sortMatrix(mat,options):
     cmd = 'newmat = sorted(mat, key=lambda x:(%s), reverse=%s)' \
           %(','.join(['x[%d]'%n for n in range(1,len(mat[0]))]),str(options.reverse))
+    print cmd
     exec cmd
     return newmat
 

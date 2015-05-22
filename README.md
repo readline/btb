@@ -71,6 +71,7 @@ This script can sort a matrix either by row or by column, either in or not in re
 A small tool for soring a table.
 
 The table could have a header line or not, but first column in a line must be a row title.
+In this version, first column must be row title, and other values in the row must be int or float.
 
 ```
 Usage: sortCols.py [options]

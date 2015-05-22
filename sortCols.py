@@ -62,13 +62,14 @@ def importFile2MatrixDic(options):
 def matDic2mat(matDic):
     tmp = []
     for n in range(len(matDic)-1):
-        tmp.append([n] + [float(n) for n in matDic[n][1:]])
+        rowtmp = [n]
+        tmp.append([n] + [float(item) for item in matDic[n][1:]])
     return tmp
 
 
 def sortMatrix(mat,options):
     colList = colParser(options.col)
-    cmd = 'newmat = sorted(mat, key=lambda x:(%s), reverse=%s)' %(','.join(['x[%d]'%n for n in colList]),str(options.reverse))
+    cmd = 'newmat = sorted(mat, key=lambda x:(%s), reverse=%s)' %(','.join(['x[%d]'%(n-1) for n in colList]),str(options.reverse))
     exec cmd
     return newmat
 
