@@ -63,6 +63,9 @@ Some tools for database collecting and manipulating
 
 ---
 ## sortCols.py 
+A small tool for soring a table.
+
+The table could have a header line or not, but first column in a line must be a row title.
 
 ```
 Usage: sortCols.py [options]
