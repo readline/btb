@@ -61,3 +61,20 @@ Some tools for database collecting and manipulating
 	  -o OUTPATH, --output=OUTPATH
 	                        Output file path
 
+---
+## sortCols.py 
+
+```
+Usage: sortCols.py [options]
+
+Options:
+  -h, --help            show this help message and exit
+  -i INPATH, --input=INPATH
+                        Input table path
+  -o OUTPATH, --output=OUTPATH
+                        Output table path
+  -c COL, --col=COL     Sort with col order. If want to sort by multiple
+                        columns, separate items with comma. [Example: 5,3,1]
+  -r, --reverse         Sort in reverse order?
+  -t, --header          Have header line?
+```
