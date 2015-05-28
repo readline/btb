@@ -1,7 +1,13 @@
 #!/usr/bin/env python
-# Fasta.py
-# Kai Yu
-# Version 1.3 @ 150411
+# =============================================================================
+# Filename: Fasta.py
+# Version:  1.4
+# Author: Kai Yu - finno@live.cn
+# https://github.com/readline
+# Last modified: 2015-05-28 19:27
+# Description: 
+#   Change textwrap.wrap function to self wrote mywrap because the textwrap.wrap is too slow.
+# =============================================================================
 class Parse(object):
     '''class Parse(fastaPath)
     return self.id (list)
@@ -53,10 +59,23 @@ class Parse(object):
                     break
         self.file.close()
 
+def mywrap(text, size):
+    total = len(text)
+    if total <= size:
+        return [text]
+    
+    if total % size == 0:
+        lines = total / size
+    else:
+        lines = total / size +1
+    tmp = []
+    for n in range(lines):
+        tmp.append(text[n * size: (n+1) * size])
+    return tmp
+
 def write(fadic, savepath, orderlist=[],description={}):
     '''func write(fadic, savepath, *orderlist=[default []], *description=[default {}])
     '''
-    from textwrap import wrap
     fadic = fadic
     savepath = savepath
     orderlist = orderlist
@@ -75,6 +94,6 @@ def write(fadic, savepath, orderlist=[],description={}):
         if seqid in description:
             des = description[seqid]
         infile.write('>'+seqid+'\t'+des+'\n')
-        infile.write('\n'.join(wrap(seq,60)) + '\n')
+        infile.write('\n'.join(mywrap(seq,60)) + '\n')
 
     infile.close()
