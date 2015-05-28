@@ -87,3 +87,30 @@ Options:
   -r, --reverse         Sort in reverse order?
   -t, --header          Have header line?
 ```
+
+---
+## bwa-pipe.py
+
+#### version 1.0
+
+A automatic pipeline to run bwa-samtools-sortSam pipeline for either single end or paired end data.
+
+```
+./bwa-pipe.py -h 
+Usage: bwa-pipe.py [options]
+
+Options:
+  -h, --help            show this help message and exit
+  -1 FILE1, --read1=FILE1
+                        Read 1 file.
+  -2 FILE2, --read2=FILE2
+                        Read 2 file. If not given, run bwa in SE mode.
+  -o PREFIX, --prefix=PREFIX
+                        Output prefix. [Default=bwa_output]
+  -r REF, --ref=REF     Reference fasta path.
+  -t THREADS, --threads=THREADS
+                        Threads to use. [Default=1]
+  -g RG, --rg=RG        Read Group.
+  -a OPTION, --option=OPTION
+                        Bwa option. [Default="-e 50 -i 15 -q 10"]
+```
