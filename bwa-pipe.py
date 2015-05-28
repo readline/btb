@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # =============================================================================
 # Filename: bwa-pipe.py
-# Version: 
+# Version:  1.0 
 # Author: Kai Yu - finno@live.cn
 # https://github.com/readline
 # Last modified: 2015-05-28 21:18
 # Description: 
-# 
+#   A automatic pipeline to run bwa-samtools-sortSam pipeline for either single end or paired end data. 
 # =============================================================================
 import os, sys
 import time
