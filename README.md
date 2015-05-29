@@ -95,6 +95,10 @@ Options:
 
 A automatic pipeline to run bwa-samtools-sortSam pipeline for either single end or paired end data.
 
+Feature:
+
+- Checkpoint setted during alignment. If any cmd failed because of some reason, just rerun, it would skip finished part.
+
 ```
 ./bwa-pipe.py -h 
 Usage: bwa-pipe.py [options]
