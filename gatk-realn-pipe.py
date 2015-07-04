@@ -38,7 +38,7 @@ def main():
     parser.add_option("-s", "--sample", dest="sample", help="Sample ID.")
     parser.add_option("-o", "--prefix", dest="prefix", help="Output prefix.")
     parser.add_option("-m", "--tmpdir", dest="tmpdir", help="Java runtime tmp dir.", default="/tmp")
-    parser.add_option("-L", "--region", dest="region", help="GATK analysis region.", default="All chr.")
+    parser.add_option("-L", "--region", dest="region", help="GATK analysis region.[default=All]", default="")
     parser.add_option("-f", "--fasta", dest="fasta", help="Reference fasta.")
     parser.add_option("-1", "--known1", dest="known1", help="1000G phase1.")
     parser.add_option("-2", "--known2", dest="known2", help="Mills and 1000G.")
