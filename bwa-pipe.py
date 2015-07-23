@@ -49,8 +49,8 @@ def pe_run(options, bins):
 
     cmd4 = '%s view -bS %s.sam -o %s.bam' %(bins['sam'], options.prefix, options.prefix) 
     
-    cmd5 = 'java -Xmx4g -jar %s INPUT=%s.bam OUTPUT=%s.sort.bam SORT_ORDER=coordinate VALIDATION_STRINGENCY=LENIENT' \
-            %(bins['sortsam'], options.prefix, options.prefix)
+    cmd5 = 'java -Xmx4g -jar %s SortSam INPUT=%s.bam OUTPUT=%s.sort.bam SORT_ORDER=coordinate VALIDATION_STRINGENCY=LENIENT' \
+            %(bins['picard'], options.prefix, options.prefix)
 
     cmd6 = '%s flagstat %s.sort.bam >%s.sort.bam.flagstat' %(bins['sam'], options.prefix, options.prefix)
 
@@ -168,7 +168,7 @@ def main():
     bins = {
             'sam':'/delldata/Analysis/yukai/software/samtools-0.1.19/samtools',
             'bwa':'/delldata/Analysis/yukai/software/bwa-0.7.10/bwa',
-            'sortsam':'/delldata/Analysis/yukai/software/picard-tools-1.119/SortSam.jar'
+            'picard':'/delldata/Analysis/yukai/software/picard-1.134/picard.jar'
             }
 
     if not options.file2:
