@@ -118,3 +118,10 @@ Options:
   -a OPTION, --option=OPTION
                         Bwa option. [Default="-e 50 -i 15 -q 10"]
 ```
+
+---
+## heatmap.cluster.plot.py
+
+A tools using python, scipy, numpy, matplotlib to make clustered heatmap from a matrix.
+
+Best for Diff exp matrix.
