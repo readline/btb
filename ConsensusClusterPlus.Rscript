@@ -1,0 +1,39 @@
+#!/usr/bin/env Rscript
+# =============================================================================
+# Filename: ConsensusClusterPlus.Rscript
+# Version: 
+# Author: Kai Yu - finno@live.cn
+# https://github.com/readline
+# Last modified: 2016-01-23 22:43
+# Description: 
+# 
+# =============================================================================
+library(ConsensusClusterPlus)
+argv <- commandArgs(T)
+matrixpath <- argv[1]
+prefix <- argv[2]
+input <- read.table(file=matrixpath, sep='\t', header=T, row.names=1)
+mads <- apply(input, 1, mad)
+d <- input[rev(order(mads))[1:5000],]
+d <- sweep(d, 1, apply(d, 1, median, na.rm=T))
+d <- as.matrix(d)
+results = ConsensusClusterPlus(d,maxK=6,reps=50,pItem=0.8,pFeature=1,title=prefix,
+    clusterAlg="hc",distance="pearson",seed=1262118388.71279,plot="pdf")
+
+pdf(file=paste(prefix, 'hclust.tree.pdf', sep='/'), width=20, height=10)
+for (i in c(2,3,4,5,6)) {
+    dend1 <- results[[i]][['consensusTree']]
+    ordername <- colnames(d)[results[[i]][['consensusTree']]$order]
+
+    sampleordermatrix <- as.matrix(results[[i]]$consensusClass[ordername])
+    colnames(sampleordermatrix) <- c('Cluster')
+    write.table(sampleordermatrix, file=paste(prefix, paste('ConsensusCluster',i,'sampleorder',sep='.'), sep='/'), 
+        sep='\t', quote=F, row.names=T, col.names=T)
+    datamatrix <- results[[i]][['consensusMatrix']]
+    colnames(datamatrix) <- ordername
+    rownames(datamatrix) <- ordername
+    write.table(datamatrix, file=paste(prefix, paste('ConsensusCluster',i,'matrix',sep='.'),sep='/'),
+        sep='\t', quote=F, row.names=T, col.names=T)
+    plot(dend1,hang=-1,label=ordername)
+}
+dev.off()
