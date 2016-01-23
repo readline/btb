@@ -85,8 +85,8 @@ def clusterPlot(matrix, prefix):
     dendro_c = dendrogram(lnk_c, orientation='top')
 
     idx_r = dendro_r['leaves']
-    #idx_c = dendro_c['leaves']
-    idx_c = [1, 2, 0, 4, 7, 8, 9, 6, 3, 5]
+    idx_c = dendro_c['leaves']
+    #idx_c = [1, 2, 0, 4, 7, 8, 9, 6, 3, 5]
 
     sorted_rowname = [matrix.rownames[n] for n in idx_r]
     sorted_colname = [matrix.colnames[n] for n in idx_c]
@@ -109,7 +109,7 @@ def clusterPlot(matrix, prefix):
     #ax_den_left= fig.add_axes([0.035,0.13,0.125,0.7], frame_on=False)
     ax_den_top = fig.add_axes([0.2,0.84, 0.6,0.1], frame_on=False)
     ax_den_left= fig.add_axes([0.035,0.13,0.15,0.7], frame_on=False)
-    heatmap = ax_heat.imshow(m3, aspect='auto', origin='lower', norm=norm, interpolation='nearest', cmap=plt.cm.coolwarm)
+    heatmap = ax_heat.imshow(m3, aspect='auto', origin='lower', norm=norm, interpolation='nearest', cmap=plt.cm.bwr)
     ## colorbar
     heatmap_cb = matplotlib.colorbar.Colorbar(ax_heat_cb, heatmap, ticklocation='bottom', orientation='horizontal')
 
@@ -142,6 +142,7 @@ def clusterPlot(matrix, prefix):
     fig.suptitle('Log2 centered heatmap of %s'%matrix.filename, fontproperties = font(24))
 
     fig.savefig(prefix+'.pdf')
+    fig.savefig(prefix+'.svg')
     fig.savefig(prefix+'.png')
     
     savefile = open(prefix + '.log2.clustered.matrix','w')
