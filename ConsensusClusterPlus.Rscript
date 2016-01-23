@@ -1,35 +1,61 @@
 #!/usr/bin/env Rscript
 # =============================================================================
 # Filename: ConsensusClusterPlus.Rscript
-# Version: 
+# Version: 2.0
 # Author: Kai Yu - finno@live.cn
 # https://github.com/readline
-# Last modified: 2016-01-23 22:43
+# Last modified: 2016-01-23 22:45
 # Description: 
-# 
+#   version 2.0: silhouette module added
 # =============================================================================
 library(ConsensusClusterPlus)
+library(cluster)
 argv <- commandArgs(T)
 matrixpath <- argv[1]
 prefix <- argv[2]
+colorlist <- c('#454553','#FFDE7D','#4AA0D5','#5E1043','#00B8A9',
+               '#EB586F','#8D6EC8','#FF895D','#83FFE1','#5BE7A9')
+
 input <- read.table(file=matrixpath, sep='\t', header=T, row.names=1)
 mads <- apply(input, 1, mad)
 d <- input[rev(order(mads))[1:5000],]
-d <- sweep(d, 1, apply(d, 1, median, na.rm=T))
-d <- as.matrix(d)
-results = ConsensusClusterPlus(d,maxK=6,reps=50,pItem=0.8,pFeature=1,title=prefix,
-    clusterAlg="hc",distance="pearson",seed=1262118388.71279,plot="pdf")
+d1 <- sweep(d, 1, apply(d, 1, median, na.rm=T))
+d2 <- as.matrix(d1)
+
+res <- ConsensusClusterPlus(d2,maxK=10,reps=50,pItem=0.8,pFeature=1,title=prefix,clusterAlg="hc",distance="pearson",seed=1262118388.71279,plot="pdf")
+icl <- calcICL(res,title=prefix,plot='pdf')
+
+avgs <- c()
+avgs[2:10] <- -1
+pdf(paste(prefix,'silhouette.pdf',sep='/'), width=8, height=12)
+for (k in 2:10) {
+    con <- icl[[2]][icl[[2]][, "k"] == k, ]
+    conMat <- con[con[, 2]==1, 4]
+    for (i in 2:k) {
+        conMat <- cbind(conMat, con[con[, 2]==i, 4])
+    }
+    rownames(conMat) <- con[con[,2]==1, 3]
+    clus <- apply(conMat, 1, which.max)
+    d1.order <- d1[, names(clus)]
+    silh <- silhouette(clus, as.dist(1-cor(d1.order)))
+
+    plot(silh, col=colorlist[1:length(summary(silh)$clus.sizes)])
+    avgs[k] = summary(silh)$avg.width
+}
+plot(avgs, type="o", xlabel='K', ylabel='Average silhouette width',
+     main='Average silhouette value in each cluster', xlim=c(2,10), lwd=3)
+dev.off()
 
 pdf(file=paste(prefix, 'hclust.tree.pdf', sep='/'), width=20, height=10)
-for (i in c(2,3,4,5,6)) {
-    dend1 <- results[[i]][['consensusTree']]
-    ordername <- colnames(d)[results[[i]][['consensusTree']]$order]
+for (i in 2:10) {
+    dend1 <- res[[i]][['consensusTree']]
+    ordername <- colnames(d)[res[[i]][['consensusTree']]$order]
 
-    sampleordermatrix <- as.matrix(results[[i]]$consensusClass[ordername])
+    sampleordermatrix <- as.matrix(res[[i]]$consensusClass[ordername])
     colnames(sampleordermatrix) <- c('Cluster')
     write.table(sampleordermatrix, file=paste(prefix, paste('ConsensusCluster',i,'sampleorder',sep='.'), sep='/'), 
         sep='\t', quote=F, row.names=T, col.names=T)
-    datamatrix <- results[[i]][['consensusMatrix']]
+    datamatrix <- res[[i]][['consensusMatrix']]
     colnames(datamatrix) <- ordername
     rownames(datamatrix) <- ordername
     write.table(datamatrix, file=paste(prefix, paste('ConsensusCluster',i,'matrix',sep='.'),sep='/'),
