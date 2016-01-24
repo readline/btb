@@ -1,0 +1,64 @@
+#!/usr/bin/env Rscript
+# =============================================================================
+# Filename: clusterGroupFpkmTests.Rscript
+# Version: 
+# Author: Kai Yu - finno@live.cn
+# https://github.com/readline
+# Last modified: 2016-01-24 16:41
+# Description: 
+# 
+# =============================================================================
+library(parallel)
+argv <- commandArgs(T)
+matrixpath <- argv[1]
+clusterpath<- argv[2]
+test <- argv[3]
+prefix <- argv[4]
+
+print('Load expression matrix')
+exp_data <- read.table(file=matrixpath, sep='\t', header=T, row.names=1)
+print('Load group matrix')
+group_data <- read.table(file=clusterpath, sep='\t', header=T, row.names=1)
+
+calcTtest <- function(x, group_data, group) {
+    group_data <- as.vector(group_data)
+    return(t.test(as.numeric(x[group_data$Cluster==group]),as.numeric(x[group_data$Cluster!=group]))$p.value)
+}
+
+calcWilcox <- function(x, group_data, group) {
+    group_data <- as.vector(group_data)
+    return(wilcox.test(as.numeric(x[group_data$Cluster==group]),as.numeric(x[group_data$Cluster!=group]))$p.value)
+}
+
+calcFc <- function(x, group_data, group) {
+    group_data <- as.vector(group_data)
+    v1 <- log2(mean(as.numeric(x[group_data$Cluster==group]),na.rm=T)+1)
+    v2 <- log2(mean(as.numeric(x[group_data$Cluster!=group]),na.rm=T)+1)
+    return(v1/v2)
+}
+
+if (test=='t.test'){
+    usetest <- calcTtest
+    print('Using T-test')
+} else {
+    usetest <- calcWilcox
+    print('Using Wilcox-test')
+}
+
+cl.cores <- detectCores()
+cl <- makeCluster(cl.cores)
+
+out <- c()
+for (i in 1:max(group_data$Cluster)) {
+    t_pvalue <- parApply(cl=cl, exp_data, 1, usetest, group_data, i)
+    t_qvalue <- p.adjust(t_pvalue, method='BH', n=length(t_pvalue))
+    t_diff <- parApply(cl=cl, exp_data, 1, calcFc, group_data, i)
+    t_cluster <- rep(i, length(t_pvalue))
+    tmpout <- cbind(t_pvalue, t_qvalue, t_diff, t_cluster)
+    colnames(tmpout) <- c('pvalue', 'fdr', 'FC(log2(FPKM+1))', 'cluster')
+    rownames(tmpout) <- rownames(exp_data)
+    out <- rbind(out, tmpout)
+}
+
+orderout <- out[order(out[,'pvalue']),]
+write.table(orderout, prefix, sep='\t', quote=F, row.name=T, col.name=T)
